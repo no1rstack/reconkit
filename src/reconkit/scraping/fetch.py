@@ -49,7 +49,7 @@ def fetch_url(
     timeout_s: float = 20.0,
     rps: float = 1.0,
     obey_robots: bool = True,
-    user_agent: str = "reconkit/0.1 (+https://localhost)",
+    user_agent: str = "reconkit/0.2 (+https://github.com/no1rstack/reconkit)",
     retries: int = 2,
     max_redirects: int = 10,
     allow_private_hosts: bool = False,

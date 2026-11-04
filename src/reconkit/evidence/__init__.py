@@ -2,8 +2,8 @@
 
 from .archives import export_wacz, export_warc
 from .custody import CustodyLedger
-from .manifest import ManifestSigner, verify_manifest, write_manifest
 from .iris import DFIRIRISAdapter
+from .manifest import ManifestSigner, verify_manifest, write_manifest
 
 __all__ = [
     "CustodyLedger",

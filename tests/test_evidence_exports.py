@@ -41,6 +41,7 @@ def test_custody_hash_chain_and_signed_manifest_detect_tampering(tmp_path: Path)
     signer = ManifestSigner.generate()
     manifest = write_manifest([evidence], tmp_path / "manifest.json", signer, custody_ledger=ledger.path)
     assert verify_manifest(manifest)
+    assert verify_manifest(manifest, evidence_dir=tmp_path)
     contents = json.loads(manifest.read_text(encoding="utf-8"))
     contents["manifest"]["files"][0]["bytes"] = 1
     manifest.write_text(json.dumps(contents), encoding="utf-8")

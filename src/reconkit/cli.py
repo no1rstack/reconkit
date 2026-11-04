@@ -6,9 +6,9 @@ from typing import Optional
 import typer
 from rich.console import Console
 
+from reconkit.evidence.archives import export_wacz, export_warc
 from reconkit.noir import public_api
 from reconkit.noir.primitives import VerificationResult, json_dumps_audit
-from reconkit.evidence.archives import export_wacz, export_warc
 from reconkit.scraping.fetch import fetch_url
 
 app = typer.Typer(add_completion=False, no_args_is_help=True)
@@ -56,22 +56,6 @@ def evidence_acquire_web(
         rps=rps,
         obey_robots=obey_robots,
     )
-
-
-@evidence_app.command("archive-warc")
-def evidence_archive_warc(url: str, output: Path = typer.Option(..., "--output", "-o"), max_bytes: int = typer.Option(2_000_000)):
-    """Capture one public URL and preserve its response in WARC 1.1."""
-    capture = fetch_url(url, max_bytes=max_bytes)
-    path = export_warc([capture], output)
-    typer.echo(json_dumps_audit({"format": "WARC 1.1", "path": str(path)}))
-
-
-@evidence_app.command("archive-wacz")
-def evidence_archive_wacz(url: str, output: Path = typer.Option(..., "--output", "-o"), title: str = typer.Option("ReconKit collection"), max_bytes: int = typer.Option(2_000_000)):
-    """Capture one public URL and create a portable WACZ 1.2 archive."""
-    capture = fetch_url(url, max_bytes=max_bytes)
-    path = export_wacz([capture], output, title=title)
-    typer.echo(json_dumps_audit({"format": "WACZ 1.2", "path": str(path)}))
     _emit(
         VerificationResult(
             verification_status="informational",
@@ -84,6 +68,31 @@ def evidence_archive_wacz(url: str, output: Path = typer.Option(..., "--output",
             ],
         )
     )
+
+
+@evidence_app.command("archive-warc")
+def evidence_archive_warc(
+    url: str,
+    output: Path = typer.Option(..., "--output", "-o"),
+    max_bytes: int = typer.Option(2_000_000),
+):
+    """Capture one public URL and preserve its response in WARC 1.1."""
+    capture = fetch_url(url, max_bytes=max_bytes)
+    path = export_warc([capture], output)
+    typer.echo(json_dumps_audit({"format": "WARC 1.1", "path": str(path)}))
+
+
+@evidence_app.command("archive-wacz")
+def evidence_archive_wacz(
+    url: str,
+    output: Path = typer.Option(..., "--output", "-o"),
+    title: str = typer.Option("ReconKit collection"),
+    max_bytes: int = typer.Option(2_000_000),
+):
+    """Capture one public URL and create a portable WACZ 1.2 archive."""
+    capture = fetch_url(url, max_bytes=max_bytes)
+    path = export_wacz([capture], output, title=title)
+    typer.echo(json_dumps_audit({"format": "WACZ 1.2", "path": str(path)}))
 
 
 @evidence_app.command("derive-links")

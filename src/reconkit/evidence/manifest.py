@@ -9,6 +9,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+from cryptography.exceptions import InvalidSignature
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey, Ed25519PublicKey
 
@@ -24,11 +25,11 @@ class ManifestSigner:
         self._private_key = private_key
 
     @classmethod
-    def generate(cls) -> "ManifestSigner":
+    def generate(cls) -> ManifestSigner:
         return cls(Ed25519PrivateKey.generate())
 
     @classmethod
-    def load(cls, pem: bytes, password: bytes | None = None) -> "ManifestSigner":
+    def load(cls, pem: bytes, password: bytes | None = None) -> ManifestSigner:
         key = serialization.load_pem_private_key(pem, password=password)
         if not isinstance(key, Ed25519PrivateKey):
             raise TypeError("An Ed25519 private key is required.")
@@ -63,13 +64,35 @@ def write_manifest(files: list[str | Path], destination: str | Path, signer: Man
     return path
 
 
-def verify_manifest(path: str | Path) -> bool:
+def verify_manifest(path: str | Path, *, evidence_dir: str | Path | None = None) -> bool:
+    """Verify a manifest signature and, optionally, the referenced evidence files.
+
+    Supplying ``evidence_dir`` verifies each listed file and custody ledger against
+    its recorded SHA-256. Without it, this function verifies the signed manifest
+    envelope only.
+    """
     envelope = json.loads(Path(path).read_text(encoding="utf-8"))
     public_key = serialization.load_pem_public_key(envelope["public_key_pem"].encode("ascii"))
     if not isinstance(public_key, Ed25519PublicKey) or envelope.get("algorithm") != "Ed25519":
         return False
     try:
         public_key.verify(base64.b64decode(envelope["signature"]), _canonical(envelope["manifest"]))
+    except (InvalidSignature, KeyError, TypeError, ValueError):
+        return False
+
+    if evidence_dir is None:
         return True
-    except Exception:
+    root = Path(evidence_dir)
+    try:
+        for item in envelope["manifest"]["files"]:
+            artifact = root / item["path"]
+            if not artifact.is_file() or hashlib.sha256(artifact.read_bytes()).hexdigest() != item["sha256"]:
+                return False
+        ledger = envelope["manifest"].get("custody_ledger")
+        if ledger:
+            artifact = root / ledger["path"]
+            if not artifact.is_file() or hashlib.sha256(artifact.read_bytes()).hexdigest() != ledger["sha256"]:
+                return False
+        return True
+    except (KeyError, OSError, TypeError):
         return False

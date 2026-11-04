@@ -4,10 +4,11 @@ from __future__ import annotations
 
 import hashlib
 import json
+import zipfile
 from datetime import timezone
 from pathlib import Path
+from urllib.parse import urlsplit
 from uuid import uuid4
-import zipfile
 
 from reconkit.scraping.fetch import FetchResult
 
@@ -18,6 +19,19 @@ def _json(value: object) -> bytes:
 
 def _sha256(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
+
+
+def _surt(url: str) -> str:
+    """Return a CDXJ-compatible SURT key for a captured URL."""
+    parsed = urlsplit(url)
+    hostname = (parsed.hostname or "").lower().strip(".")
+    authority = ",".join(reversed(hostname.split(".")))
+    if parsed.port and parsed.port not in {80, 443}:
+        authority = f"{authority}:{parsed.port}"
+    path = parsed.path or "/"
+    if parsed.query:
+        path = f"{path}?{parsed.query}"
+    return f"{authority}){path}"
 
 
 def _warc_record(headers: dict[str, str], body: bytes) -> bytes:
@@ -72,7 +86,7 @@ def export_wacz(captures: list[FetchResult], destination: str | Path, *, title: 
     path.parent.mkdir(parents=True, exist_ok=True)
     warc, index = warc_bytes(captures)
     cdxj = b"".join(
-        f"{entry['url']} {entry['timestamp']} ".encode("utf-8") + _json({
+        f"{_surt(str(entry['url']))} {entry['timestamp']} ".encode() + _json({
             "url": entry["url"], "status": entry["status"], "digest": entry["digest"],
             "offset": entry["offset"], "length": entry["length"], "filename": "data.warc",
         }) + b"\n" for entry in index

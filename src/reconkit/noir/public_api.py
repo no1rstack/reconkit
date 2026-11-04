@@ -23,7 +23,7 @@ def acquire_web_artifact(
     timeout_s: float = 20.0,
     max_bytes: int = 2_000_000,
     obey_robots: bool = True,
-    user_agent: str = "reconkit/0.1 (+https://localhost)",
+    user_agent: str = "reconkit/0.2 (+https://github.com/no1rstack/reconkit)",
 ) -> EvidenceArtifact:
     """Acquire a web artifact as evidence.
 
