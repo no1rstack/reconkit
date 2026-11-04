@@ -93,6 +93,14 @@ python -m build
 twine check dist/*
 ```
 
+## Releases
+
+PyPI publication is automated by GitHub Actions. After updating the version in
+`pyproject.toml` and the changelog, push the matching annotated tag (for example,
+`v0.3.0`). The workflow verifies that the tag and package version match, builds
+the distributions, validates them with Twine, and publishes using the repository's
+`PYPI_API_TOKEN` Actions secret. Ordinary branch pushes never publish a release.
+
 ## License
 
 MIT
