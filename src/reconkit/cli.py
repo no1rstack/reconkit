@@ -75,9 +75,10 @@ def evidence_archive_warc(
     url: str,
     output: Path = typer.Option(..., "--output", "-o"),
     max_bytes: int = typer.Option(2_000_000),
+    obey_robots: bool = typer.Option(True, "--obey-robots/--no-obey-robots"),
 ):
     """Capture one public URL and preserve its response in WARC 1.1."""
-    capture = fetch_url(url, max_bytes=max_bytes)
+    capture = fetch_url(url, max_bytes=max_bytes, obey_robots=obey_robots)
     path = export_warc([capture], output)
     typer.echo(json_dumps_audit({"format": "WARC 1.1", "path": str(path)}))
 
@@ -88,9 +89,10 @@ def evidence_archive_wacz(
     output: Path = typer.Option(..., "--output", "-o"),
     title: str = typer.Option("ReconKit collection"),
     max_bytes: int = typer.Option(2_000_000),
+    obey_robots: bool = typer.Option(True, "--obey-robots/--no-obey-robots"),
 ):
     """Capture one public URL and create a portable WACZ 1.2 archive."""
-    capture = fetch_url(url, max_bytes=max_bytes)
+    capture = fetch_url(url, max_bytes=max_bytes, obey_robots=obey_robots)
     path = export_wacz([capture], output, title=title)
     typer.echo(json_dumps_audit({"format": "WACZ 1.2", "path": str(path)}))
 

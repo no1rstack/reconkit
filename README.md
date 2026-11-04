@@ -39,6 +39,7 @@ reconkit evidence archive-wacz "https://example.com" --output evidence/example.w
 ```
 
 The WACZ export follows the [WACZ 1.2 layout](https://specs.webrecorder.net/wacz/1.2.0/), so it can be validated and replayed with compatible web-archive tooling.
+Robots rules are respected by default; use `--no-obey-robots` only when you have clear authorization for the capture.
 
 ## Sign a manifest and record custody
 
