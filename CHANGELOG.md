@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 
 Format: loosely based on *Keep a Changelog*. Versioning: SemVer where practical.
 
+## [0.2.1] - 2026-11-04
+
+### Changed
+- Replaced the MIT license with Noir Stack LLC's Proprietary Software License — Free Use, No Modification.
+
 ## [0.2.0] - 2026-11-04
 
 ### Added

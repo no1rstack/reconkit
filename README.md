@@ -103,4 +103,5 @@ the distributions, validates them with Twine, and publishes using the repository
 
 ## License
 
-MIT
+Copyright © 2026 Noir Stack LLC. Licensed under the
+[Proprietary Software License — Free Use, No Modification](LICENSE).
